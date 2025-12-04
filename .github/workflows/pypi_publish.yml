@@ -198,6 +198,9 @@ jobs:
       - test_x86_wheels
       - test_linux_aarch64_wheels
     runs-on: ubuntu-latest
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/legacy/
     if: github.event_name == 'release' && github.event.action == 'published'
     permissions:
       id-token: write
