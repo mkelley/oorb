@@ -6,63 +6,47 @@ on:
       - published
 
 jobs:
-  build_x86_wheels:
-    name: Build ${{ matrix.pyversion }}/${{ matrix.os }}/x86
-    runs-on: ${{ matrix.os }}
+  wheels:
+    name: Build ${{ matrix.pyversion }}/${{ matrix.os }}
+    runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
-        pyversion: [cp310, cp311, cp312, cp313, cp314]
-        os: [macos-latest, ubuntu-latest]
-
+        pyversion: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        include:
+          - os: ubuntu
+            architecture: x86_64
+          - os: ubuntu
+            architecture: aarch64
+          - os: macos
+            architecture: x86_64
+          - os: macos
+            architecture: arm64
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout code
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
-
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v3.3.0
-        env:
-          CIBW_BUILD: "${{ matrix.pyversion }}*"
-          CIBW_ARCHS: "x86_64"
-        with:
-          output-dir: wheelhouse
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: x86_wheels
-          path: ./wheelhouse/*.whl
-
-  build_aarch64_wheels:
-    name: Build ${{ matrix.pyversion }}/linux/aarch64
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        pyversion: [cp310, cp311, cp312, cp313, cp314]
-
-    steps:
-      - uses: actions/checkout@v6
-      - name: Set up QEMU
-        if: runner.os == 'Linux'
+      - name: Setup QEMU
         uses: docker/setup-qemu-action@v3
         with:
           platforms: arm64
-
+        if: runner.os == 'Linux' && matrix.architecture == 'aarch64'
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: $${{ matrix.pyversion }}
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.3.0
         env:
           CIBW_BUILD: "${{ matrix.pyversion }}*"
-          CIBW_ARCHS: aarch64
-          # Numpy doesn't provide musl aarch64 wheels, and building
-          # Numpy from scratch in that scenario takes a _very_ long
-          # time (6+ hours, it times out). So, skip those.
-          CIBW_SKIP: "*-musllinux*"
+          CIBW_ARCHS: "${{ matrix.architecture }}"
         with:
           output-dir: wheelhouse
-
-      - uses: actions/upload-artifact@v4
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          name: aarch64_wheels
-          path: ./wheelhouse/*.whl
+          name: wheels-${{ matrix.os }}-${{ matrix.architecture }}
+          path: wheelhouse/*.whl
 
   build_ephem:
     name: Build ephemeris data
@@ -90,82 +74,51 @@ jobs:
             ./data
             !./data/JPL_ephemeris
 
-  test_x86_wheels:
-    name: Test ${{ matrix.pyversion }}/${{ matrix.os }}/x86
-    needs: [build_x86_wheels, build_ephem]
-    runs-on: ubuntu-latest
+  # test all os, architecture, python combinations, the steps branch depending
+  # on if the architecture is (linux/)aarch64 or not
+  test_wheels:
+    name: Test ${{ matrix.pyversion }}/${{ matrix.os }}
+    needs: [wheels, build_ephem]
+    runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
         pyversion: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-        os: [ubuntu-latest, macos-latest]
-
+        include:
+          - os: ubuntu
+            architecture: x86_64
+          - os: ubuntu
+            architecture: aarch64
+          - os: macos
+            architecture: x86_64
+          - os: macos
+            architecture: arm64
     steps:
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: ${{ matrix.pyversion }}
-      - name: Get wheels
-        uses: actions/download-artifact@v5
-        with:
-          name: x86_wheels
-          path: /tmp/wheels
-      - name: Install pyoorb from wheel
-        run: |
-          # First, install with --no-index to make sure we don't hit up PyPI and only
-          # use the local wheel. Use --no-deps, because we don't have a local copy of
-          # any dependencies.
-          pip install --no-index --no-deps --find-links /tmp/wheels pyoorb
-          # Now that we are sure the local wheel works, install dependencies by repeating
-          # the command, but this time allowing the index and deps.
-          pip install --find-links /tmp/wheels pyoorb
-      - name: Get oorb data
-        uses: actions/download-artifact@v5
-        with:
-          name: oorb_data
-          path: /tmp/oorb_data
-      - name: Try importing pyoorb
-        run: |
-          export OORB_DATA=/tmp/oorb_data
-          python -c "import pyoorb; print('success.')"
+          python-version: $${{ matrix.pyversion }}
       - name: Checkout oorb for python/test.py
         uses: actions/checkout@v6
         with:
           path: ./_oorb
-      - name: Execute tests
-        run: |
-          export OORB_DATA=/tmp/oorb_data
-          python ./_oorb/python/test.py
-
-  test_linux_aarch64_wheels:
-    # Runs in emulation, so this can be very slow!
-    name: Test ${{ matrix.pyversion }}/linux/aarch64
-    needs: [build_aarch64_wheels, build_ephem]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        pyversion: ["3.10", "3.11", "3.12", "3.13", "3.14"]
-
-    steps:
       - name: Get wheels
         uses: actions/download-artifact@v5
         with:
-          name: aarch64_wheels
+          name: wheels-${{ matrix.os }}-${{ matrix.architecture }}
           path: /tmp/artifacts/wheels
       - name: Get oorb data
         uses: actions/download-artifact@v5
         with:
           name: oorb_data
           path: /tmp/artifacts/oorb_data
-      - name: Checkout oorb for python/test.py
-        uses: actions/checkout@v6
-        with:
-          path: ./_oorb
-      - name: Set up QEMU
-        if: runner.os == 'Linux'
+      - name: Setup QEMU
+        if: matrix.architecture == 'aarch64'
         uses: docker/setup-qemu-action@v3
         with:
           platforms: arm64
       - name: Run tests in container
+        if: matrix.architecture == 'aarch64'
+        # Runs in emulation, so this can be very slow!
         run: |
           export DOCKER_IMAGE="arm64v8/python:${{ matrix.pyversion }}"
           docker pull --platform linux/arm64 $DOCKER_IMAGE
@@ -179,6 +132,26 @@ jobs:
             pip install --no-index --no-deps --find-links /tmp/artifacts/wheels pyoorb && \
             pip install --find-links /tmp/artifacts/wheels pyoorb && \
             python /tmp/oorb_latest/python/test.py"
+      - name: Install pyoorb from wheel
+        if: ${{ matrix.architecture != 'aarch64' }}
+        run: |
+          # First, install with --no-index to make sure we don't hit up PyPI and only
+          # use the local wheel. Use --no-deps, because we don't have a local copy of
+          # any dependencies.
+          pip install --no-index --no-deps --find-links /tmp/artifacts/wheels pyoorb
+          # Now that we are sure the local wheel works, install dependencies by repeating
+          # the command, but this time allowing the index and deps.
+          pip install --find-links /tmp/artifacts/wheels pyoorb
+      - name: Try importing pyoorb
+        if: ${{ matrix.architecture != 'aarch64' }}
+        run: |
+          export OORB_DATA=/tmp/artifacts/oorb_data
+          python -c "import pyoorb; print('success.')"
+      - name: Execute tests
+        if: ${{ matrix.architecture != 'aarch64' }}
+        run: |
+          export OORB_DATA=/tmp/artifacts/oorb_data
+          python ./_oorb/python/test.py
 
   build_sdist:
     # Make a plain source distribution with nothing precompiled.
@@ -196,8 +169,7 @@ jobs:
     name: Upload release to PyPI
     needs:
       - build_sdist
-      - test_x86_wheels
-      - test_linux_aarch64_wheels
+      - test_wheels
     runs-on: ubuntu-latest
     environment:
       name: testpypi
@@ -208,20 +180,11 @@ jobs:
     steps:
       - uses: actions/download-artifact@v5
         with:
-          name: sdist
+          merge-multiple: true
+          pattern: wheels-*
           path: ./sdist/
       - uses: actions/download-artifact@v5
         with:
-          name: x86_wheels
-          path: ./x86_wheels/
-      - uses: actions/download-artifact@v5
-        with:
-          name: aarch64_wheels
-          path: ./aarch64_wheels/
-      - name: Combine artifacts
-        run: |
-          mkdir dist
-          mv sdist/* dist
-          mv x86_wheels/* dist
-          mv aarch64_wheels/* dist
+          name: sdist
+          path: ./sdist/
       - uses: pypa/gh-action-pypi-publish@release/v1
