@@ -15,19 +15,19 @@ jobs:
         os: [macos-latest, ubuntu-latest]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.11.4
+        uses: pypa/cibuildwheel@v3.3.0
         env:
           CIBW_BUILD: "${{ matrix.pyversion }}*"
           CIBW_ARCHS: "x86_64"
         with:
           output-dir: wheelhouse
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: x86_wheels
           path: ./wheelhouse/*.whl
@@ -40,15 +40,15 @@ jobs:
         pyversion: [cp38, cp39, cp310, cp311, cp312, cp313, cp314]
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - name: Set up QEMU
         if: runner.os == 'Linux'
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         with:
           platforms: arm64
 
       - name: Build wheels
-        uses: pypa/cibuildwheel@v2.11.4
+        uses: pypa/cibuildwheel@v3.3.0
         env:
           CIBW_BUILD: "${{ matrix.pyversion }}*"
           CIBW_ARCHS: aarch64
@@ -59,7 +59,7 @@ jobs:
         with:
           output-dir: wheelhouse
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: aarch64_wheels
           path: ./wheelhouse/*.whl
@@ -68,7 +68,7 @@ jobs:
     name: Build ephemeris data
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - name: Install dependencies
         run: |
           sudo apt-get update -y
@@ -84,7 +84,7 @@ jobs:
           make test
           mv de430.dat ../
       - name: Supply data to later tests
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: oorb_data
           path: ./data
@@ -100,11 +100,11 @@ jobs:
 
     steps:
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.pyversion }}
       - name: Get wheels
-        uses: actions/download-artifact@v4.1.7
+        uses: actions/download-artifact@v5
         with:
           name: x86_wheels
           path: /tmp/wheels
@@ -118,7 +118,7 @@ jobs:
           # the command, but this time allowing the index and deps.
           pip install --find-links /tmp/wheels pyoorb
       - name: Get oorb data
-        uses: actions/download-artifact@v4.1.7
+        uses: actions/download-artifact@v5
         with:
           name: oorb_data
           path: /tmp/oorb_data
@@ -127,7 +127,7 @@ jobs:
           export OORB_DATA=/tmp/oorb_data
           python -c "import pyoorb; print('success.')"
       - name: Checkout oorb for python/test.py
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           path: ./_oorb
       - name: Execute tests
@@ -146,22 +146,22 @@ jobs:
 
     steps:
       - name: Get wheels
-        uses: actions/download-artifact@v4.1.7
+        uses: actions/download-artifact@v5
         with:
           name: aarch64_wheels
           path: /tmp/artifacts/wheels
       - name: Get oorb data
-        uses: actions/download-artifact@v4.1.7
+        uses: actions/download-artifact@v5
         with:
           name: oorb_data
           path: /tmp/artifacts/oorb_data
       - name: Checkout oorb for python/test.py
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
         with:
           path: ./_oorb
       - name: Set up QEMU
         if: runner.os == 'Linux'
-        uses: docker/setup-qemu-action@v2
+        uses: docker/setup-qemu-action@v3
         with:
           platforms: arm64
       - name: Run tests in container
@@ -183,10 +183,10 @@ jobs:
     # Make a plain source distribution with nothing precompiled.
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v6
       - name: Build SDist
         run: pipx run build --sdist
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: sdist
           path: dist/*.tar.gz
@@ -205,15 +205,15 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/download-artifact@v4.1.7
+      - uses: actions/download-artifact@v5
         with:
           name: sdist
           path: ./sdist/
-      - uses: actions/download-artifact@v4.1.7
+      - uses: actions/download-artifact@v5
         with:
           name: x86_wheels
           path: ./x86_wheels/
-      - uses: actions/download-artifact@v4.1.7
+      - uses: actions/download-artifact@v5
         with:
           name: aarch64_wheels
           path: ./aarch64_wheels/
