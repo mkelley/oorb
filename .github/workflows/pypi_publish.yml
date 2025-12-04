@@ -34,7 +34,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: $${{ matrix.pyversion }}
+          python-version: ${{ matrix.pyversion }}
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.3.0
         env:
@@ -96,7 +96,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: $${{ matrix.pyversion }}
+          python-version: ${{ matrix.pyversion }}
       - name: Checkout oorb for python/test.py
         uses: actions/checkout@v6
         with:
