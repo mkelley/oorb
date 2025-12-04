@@ -82,12 +82,13 @@ jobs:
           cd data/JPL_ephemeris
           make -j2
           make test
-          mv de430.dat ../
       - name: Supply data to later tests
         uses: actions/upload-artifact@v4
         with:
           name: oorb_data
-          path: ./data
+          path: |
+            ./data
+            !./data/JPL_ephemeris
 
   test_x86_wheels:
     name: Test ${{ matrix.pyversion }}/${{ matrix.os }}/x86
