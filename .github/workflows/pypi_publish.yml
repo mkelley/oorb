@@ -12,14 +12,14 @@ jobs:
     uses: ./.github/workflows/oorb_data.yml
 
   wheels:
-    name: Build ${{ matrix.pyversion }}/${{ matrix.os }}
+    name: Build ${{ matrix.pyversion }}-${{ matrix.os }}-${{ matrix.architecture }}
     runs-on: ${{ matrix.os }}-latest
 
     strategy:
       matrix:
         os: [ubuntu, macos]
         pyversion: [cp310]
-        architecture: [x86_64, aarch64, arm64]
+        architecture: [x86_64] #, aarch64, arm64]
         exclude:
           - os: ubuntu
             architecture: arm64
@@ -35,19 +35,19 @@ jobs:
       - name: Setup python for cibuildwheel
         uses: actions/setup-python@v5
 
-      # - name: Build wheels
-      #   uses: pypa/cibuildwheel@v3.3.0
-      #   env:
-      #     CIBW_BUILD: "${{ matrix.pyversion }}-*"
-      #     CIBW_ARCHS: "${{ matrix.architecture }}"
-      #   with:
-      #     output-dir: wheelhouse
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v3.3.0
+        env:
+          CIBW_BUILD: "${{ matrix.pyversion }}-*"
+          CIBW_ARCHS: "${{ matrix.architecture }}"
+        with:
+          output-dir: wheelhouse
 
-      # - name: Upload artifact
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: wheels-${{ matrix.os }}-${{ matrix.architecture }}
-      #     path: wheelhouse/*.whl
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}-${{ matrix.architecture }}
+          path: wheelhouse/*.whl
 
   # test all os, architecture, python combinations, the steps branch depending
   # on if the architecture is (linux/)aarch64 or not
