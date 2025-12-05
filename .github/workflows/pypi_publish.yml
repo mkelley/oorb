@@ -10,9 +10,11 @@ on:
 jobs:
   oorb_data:
     uses: ./.github/workflows/oorb_data.yml
+
   wheels:
     name: Build ${{ matrix.pyversion }}/${{ matrix.os }}
     runs-on: ${{ matrix.os }}-latest
+
     strategy:
       matrix:
         os: [ubuntu, macos]
@@ -23,25 +25,24 @@ jobs:
             architecture: aarch64
           - os: macos
             architecture: arm64
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-      - name: Setup QEMU
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64
-        if: runner.os == 'Linux' && matrix.architecture == 'aarch64'
+
       - name: Setup python for cibuildwheel
         uses: actions/setup-python@v5
+
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.3.0
         env:
-          CIBW_BUILD: "${{ matrix.pyversion }}"
+          CIBW_BUILD: "${{ matrix.pyversion }}-*"
           CIBW_ARCHS: "${{ matrix.architecture }}"
         with:
           output-dir: wheelhouse
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -54,6 +55,7 @@ jobs:
     name: Test ${{ matrix.pyversion }}/${{ matrix.os }}
     needs: [wheels, oorb_data]
     runs-on: ${{ matrix.os }}-latest
+
     strategy:
       matrix:
         pyversion: ["3.10", "3.11", "3.12", "3.13", "3.14"]
@@ -66,30 +68,36 @@ jobs:
             architecture: x86_64
           - os: macos
             architecture: arm64
+
     steps:
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.pyversion }}
+
       - name: Checkout oorb for python/test.py
         uses: actions/checkout@v6
         with:
           path: ./_oorb
+
       - name: Get wheels
         uses: actions/download-artifact@v5
         with:
           name: wheels-${{ matrix.os }}-${{ matrix.architecture }}
           path: /tmp/artifacts/wheels
+
       - name: Restore cached ephemeris data
         uses: actions/cache/restore@v4
         with:
           path: /tmp/artifacts/oorb_data/
           key: oorb_data
+
       - name: Setup QEMU
         if: matrix.architecture == 'aarch64'
         uses: docker/setup-qemu-action@v3
         with:
           platforms: arm64
+
       - name: Run tests in container
         if: matrix.architecture == 'aarch64'
         # Runs in emulation, so this can be very slow!
@@ -106,6 +114,7 @@ jobs:
             pip install --no-index --no-deps --find-links /tmp/artifacts/wheels pyoorb && \
             pip install --find-links /tmp/artifacts/wheels pyoorb && \
             python /tmp/oorb_latest/python/test.py"
+
       - name: Install pyoorb from wheel
         if: ${{ matrix.architecture != 'aarch64' }}
         run: |
@@ -116,11 +125,13 @@ jobs:
           # Now that we are sure the local wheel works, install dependencies by repeating
           # the command, but this time allowing the index and deps.
           pip install --find-links /tmp/artifacts/wheels pyoorb
+
       - name: Try importing pyoorb
         if: ${{ matrix.architecture != 'aarch64' }}
         run: |
           export OORB_DATA=/tmp/artifacts/oorb_data
           python -c "import pyoorb; print('success.')"
+
       - name: Execute tests
         if: ${{ matrix.architecture != 'aarch64' }}
         run: |
@@ -145,20 +156,26 @@ jobs:
       - build_sdist
       - test_wheels
     runs-on: ubuntu-latest
+
     environment:
       name: testpypi
       url: https://test.pypi.org/legacy/
+
     if: github.event_name == 'release' && github.event.action == 'published'
+
     permissions:
       id-token: write
+
     steps:
       - uses: actions/download-artifact@v5
         with:
           merge-multiple: true
           pattern: wheels-*
           path: ./sdist/
+
       - uses: actions/download-artifact@v5
         with:
           name: sdist
           path: ./sdist/
+
       - uses: pypa/gh-action-pypi-publish@release/v1
