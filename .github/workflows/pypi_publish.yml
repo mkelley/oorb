@@ -15,7 +15,7 @@ jobs:
     runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
-        pyversion: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        pyversion: [cp310, cp311, cp312, cp313, cp314]
         include:
           - os: ubuntu
             architecture: x86_64
@@ -35,13 +35,10 @@ jobs:
         with:
           platforms: arm64
         if: runner.os == 'Linux' && matrix.architecture == 'aarch64'
-      - name: Setup Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ matrix.pyversion }}
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.3.0
         with:
+          build: ${{ matrix.pyversion }}
           archs: "${{ matrix.architecture }}"
           output-dir: wheelhouse
       - name: Upload artifact
