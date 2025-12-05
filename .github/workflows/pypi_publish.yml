@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest] #, macos-latest]
-        pyversion: [cp311]
+        pyversion: [cp314]
         architecture: [x86_64] #, aarch64, arm64]
         exclude:
           - os: ubuntu
