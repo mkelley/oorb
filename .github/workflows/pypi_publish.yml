@@ -57,6 +57,12 @@ jobs:
         run: |
           sudo apt-get update -y
           sudo apt-get install gfortran liblapack-dev meson ninja-build
+      - name: Check for cached ephemeris data
+        id: cache-ephemeris
+        uses: actions/cache@v4
+        with:
+          path: data
+          key: oorb_data
       - name: Compile oorb
         run: |
           ./configure gfortran opt
@@ -66,13 +72,13 @@ jobs:
           cd data/JPL_ephemeris
           make -j2
           make test
-      - name: Supply data to later tests
-        uses: actions/upload-artifact@v4
+      - name: Cache ephemeris data
+        uses: actions/cache@v4
         with:
-          name: oorb_data
+          key: oorb_data
           path: |
-            ./data
-            !./data/JPL_ephemeris
+            data/
+            !data/JPL_ephemeris
 
   # test all os, architecture, python combinations, the steps branch depending
   # on if the architecture is (linux/)aarch64 or not
