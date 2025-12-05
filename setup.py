@@ -7,9 +7,7 @@ from pathlib import Path
 
 
 extension = Extension(
-    name="pyoorb",
-    sources=["pyoorb.f90", "pyoorb.pyf"],
-    include_dirs=["../build"]
+    name="pyoorb", sources=["pyoorb.f90", "pyoorb.pyf"], include_dirs=["../build"]
 )
 
 
@@ -25,11 +23,22 @@ class PyoorbBuild(build_ext):
         py_bin = shutil.which("python")
         if py_bin is None:
             py_bin = shutil.which("python3")
-        self.spawn(["./configure", fortran_compiler, "opt", "--with-pyoorb", "--with-f2py", f2py_bin, "--with-python", py_bin])
+        self.spawn(
+            [
+                "./configure",
+                fortran_compiler,
+                "opt",
+                "--with-pyoorb",
+                "--with-f2py",
+                f2py_bin,
+                "--with-python",
+                py_bin,
+            ]
+        )
 
     def build_extension(self, ext):
         try:
-            self.spawn(["make", "-j4"])            
+            self.spawn(["make", "-j4"])
             self.spawn(["make", "pyoorb", "-j4"])
         finally:
             os.chdir("./python")
@@ -44,32 +53,17 @@ def deduce_version():
     # This is a gnarly hack, but it ensures consistency.
     stdout = subprocess.PIPE
     cmd_output = subprocess.run(
-        ["./build-tools/compute-version.sh",  "-u"],
+        ["./build-tools/compute-version.sh", "-u"],
         stdout=stdout,
     )
     cmd_output.check_returncode()
     return cmd_output.stdout.decode("utf8").strip()
 
 
-setup(
-    name='pyoorb',
-    maintainer="oorb developers",
-    maintainer_email="oorb@googlegroups.com",
-    description="An open-source orbit-computation package for Solar System objects. ",
-    long_description=Path("README.md").read_text(encoding="utf-8"),
-    long_description_content_type="text/markdown",
-    url="https://github.com/oorb/oorb",
-    author="Mikael Granvik et al.",
-    download_url="https://pypi.python.org/pypi/pyoorb",
-    project_urls={
-        "Bug Tracker": "https://github.com/oorb/oorb/issues",
-        "Source Code": "https://github.com/oorb/oorb",
-    },
-    version=deduce_version(),
-    ext_modules=[extension],
-    install_requires=["numpy"],
-    license="GPL3",
-    cmdclass={
-        "build_ext": PyoorbBuild,
-    }
-)
+# setup(
+#     ext_modules=[extension],
+#     install_requires=["numpy"],
+#     cmdclass={
+#         "build_ext": PyoorbBuild,
+#     }
+# )
