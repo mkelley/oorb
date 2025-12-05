@@ -8,7 +8,7 @@ authors = [
 ]
 license = "GPL-3.0-only"
 license-files = ["COPYING"]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dynamic = ["version"]
 keywords = [
     "astronomy",
@@ -33,7 +33,7 @@ Issues = "https://github.com/oorb/oorb/issues"
 
 [build-system]
 build-backend = "mesonpy"
-requires = ["meson-python"]
+requires = ["meson-python", "setuptools_scm"]
 
 [tool.setuptools_scm]
 write_to = "python/_version.py"

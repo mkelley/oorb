@@ -39,10 +39,12 @@ run_command(
 )
 
 run_command('make', '-j4', check: true)
-#run_command('make', 'pyoorb', '-j4')
+
+inc = include_directories('build')
 
 py.extension_module(
   'pyoorb',
   'python/pyoorb.f90',
-  install: true
+  install: true,
+  include_directories: inc
 )
