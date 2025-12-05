@@ -18,7 +18,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [macos-15-intel] # [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest] #, macos-latest]
         pyversion: [cp311]
         architecture: [x86_64] #, aarch64, arm64]
         exclude:
