@@ -76,10 +76,8 @@ jobs:
           python-version: ${{ matrix.pyversion }}
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.3.0
-        env:
-          CIBW_BUILD: "${{ matrix.pyversion }}*"
-          CIBW_ARCHS: "${{ matrix.architecture }}"
         with:
+          archs: "${{ matrix.architecture }}"
           output-dir: wheelhouse
       - name: Upload artifact
         uses: actions/upload-artifact@v4
