@@ -1,0 +1,46 @@
+# GitHub Actions workflow for downloading oorb ephemeris, time, and observatory data
+
+on:
+  workflow_call:
+
+jobs:
+  oorb_data:
+    name: Build and cache ephemeris data
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Check for cached ephemeris data
+        id: cache_ephemeris
+        uses: actions/cache@v4
+        with:
+          path: data
+          key: oorb_data
+      - name: Install dependencies
+        if: steps.cache_ephemeris.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install gfortran liblapack-dev meson ninja-build
+      - name: Compile oorb
+        if: steps.cache_ephemeris.outputs.cache-hit != 'true'
+        run: |
+          ./configure gfortran opt
+          make -j3
+      - name: Build ephemerides
+        if: steps.cache_ephemeris.outputs.cache-hit != 'true'
+        run: |
+          cd data/JPL_ephemeris
+          make -j3
+          make test
+          ./getBC430
+          mv asteroid_indices.txt asteroid_indices.tmp
+          head -n 3 asteroid_indices.tmp > asteroid_indices.txt
+          tail -n 297 asteroid_indices.tmp | sed -e 's/^/#/' >> asteroid_indices.txt
+      - name: Cache ephemeris data
+        if: steps.cache_ephemeris.outputs.cache-hit != 'true'
+        uses: actions/cache@v4
+        with:
+          key: oorb_data
+          path: |
+            data/
+            !data/JPL_ephemeris

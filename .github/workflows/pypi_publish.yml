@@ -8,43 +8,8 @@ on:
     branches: [master]
 
 jobs:
-  build_ephem:
-    name: Build ephemeris data
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-      - name: Check for cached ephemeris data
-        id: cache_ephemeris
-        uses: actions/cache@v4
-        with:
-          path: data
-          key: oorb_data
-      - name: Install dependencies
-        if: steps.cache_ephemeris.outputs.cache-hit != 'true'
-        run: |
-          sudo apt-get update -y
-          sudo apt-get install gfortran liblapack-dev meson ninja-build
-      - name: Compile oorb
-        if: steps.cache_ephemeris.outputs.cache-hit != 'true'
-        run: |
-          ./configure gfortran opt
-          make -j2
-      - name: Build ephemerides
-        if: steps.cache_ephemeris.outputs.cache-hit != 'true'
-        run: |
-          cd data/JPL_ephemeris
-          make -j2
-          make test
-      - name: Cache ephemeris data
-        if: steps.cache_ephemeris.outputs.cache-hit != 'true'
-        uses: actions/cache@v4
-        with:
-          key: oorb_data
-          path: |
-            data/
-            !data/JPL_ephemeris
-
+  oorb_data:
+    uses: ./.github/workflows/oorb_data.yml
   wheels:
     name: Build ${{ matrix.pyversion }}/${{ matrix.os }}
     runs-on: ${{ matrix.os }}-latest
@@ -89,7 +54,7 @@ jobs:
   # on if the architecture is (linux/)aarch64 or not
   test_wheels:
     name: Test ${{ matrix.pyversion }}/${{ matrix.os }}
-    needs: [wheels, build_ephem]
+    needs: [wheels, oorb_data]
     runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
