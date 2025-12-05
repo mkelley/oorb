@@ -33,11 +33,14 @@ jobs:
         with:
           platforms: arm64
         if: runner.os == 'Linux' && matrix.architecture == 'aarch64'
+      - name: Setup python for cibuildwheel
+        uses: actions/setup-python@v5
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.3.0
+        env:
+          CIBW_BUILD: "${{ matrix.pyversion }}"
+          CIBW_ARCHS: "${{ matrix.architecture }}"
         with:
-          build: ${{ matrix.pyversion }}
-          archs: "${{ matrix.architecture }}"
           output-dir: wheelhouse
       - name: Upload artifact
         uses: actions/upload-artifact@v4
