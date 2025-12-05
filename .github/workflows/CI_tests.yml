@@ -1,11 +1,13 @@
-# This is a basic workflow to help you get started with Actions
+# Continuous integration testing workflows
 
 name: CI
 
 # Controls when the action will run. Triggers the workflow on push or pull request
 # events but only for the master branch
 on:
+  # delete after testing
   workflow_call:
+  # restore after testing
   # push:
   #   branches: [master]
   # pull_request:
