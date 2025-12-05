@@ -19,12 +19,12 @@ jobs:
       matrix:
         os: [ubuntu, macos]
         pyversion: [cp310]
-        architecture: [x86_64]
-        # include:
-        #   - os: ubuntu
-        #     architecture: aarch64
-        #   - os: macos
-        #     architecture: arm64
+        architecture: [x86_64, aarch64, arm64]
+        exclude:
+          - os: ubuntu
+            architecture: arm64
+          - os: macos
+            architecture: aarch64
 
     steps:
       - name: Checkout code
