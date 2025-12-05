@@ -15,14 +15,12 @@ jobs:
     runs-on: ${{ matrix.os }}-latest
     strategy:
       matrix:
-        pyversion: [cp310, cp311, cp312, cp313, cp314]
+        os: [ubuntu, macos]
+        pyversion: [cp310]
+        architecture: [x86_64]
         include:
           - os: ubuntu
-            architecture: x86_64
-          - os: ubuntu
             architecture: aarch64
-          - os: macos
-            architecture: x86_64
           - os: macos
             architecture: arm64
     steps:
