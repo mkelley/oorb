@@ -25,12 +25,12 @@ jobs:
         if: steps.cache_ephemeris.outputs.cache-hit != 'true'
         run: |
           ./configure gfortran opt
-          make -j3
+          make -j2
       - name: Build ephemerides
         if: steps.cache_ephemeris.outputs.cache-hit != 'true'
         run: |
           cd data/JPL_ephemeris
-          make -j3
+          make -j2
           make test
           ./getBC430
           mv asteroid_indices.txt asteroid_indices.tmp
