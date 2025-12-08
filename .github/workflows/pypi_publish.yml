@@ -53,6 +53,7 @@ jobs:
   test-wheels:
     name: Test ${{ matrix.pyversion }}/${{ matrix.os }}/${{ matrix.architecture }}
     runs-on: ${{ matrix.os }}
+    needs: [wheels, oorb_data]
 
     strategy:
       matrix:
