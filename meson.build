@@ -36,8 +36,8 @@ run_command(['pwd'])
 liboorb = custom_target(
   'liboorb',
   output: 'liboorb.a',
-#   command : ['make', '-j4']
-  command : ['ls']
+  command : ['make', '-C' , '..', '-j4', 'build', 'liboorb.a']
+#   command : ['ls']
 )
 message('@0@'.format(liboorb))
 
