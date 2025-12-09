@@ -36,7 +36,7 @@ run_command(['pwd'])
 liboorb = custom_target(
   'liboorb',
   output: 'liboorb.a',
-  command : ['make', '-C' , '..', '-j4', 'liboorb']
+  command : ['make', '-C' , '..', '-j4']
 #   command : ['ls']
 )
 
