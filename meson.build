@@ -32,7 +32,7 @@ run_command(
 liboorb = custom_target(
   'liboorb',
   output: 'liboorb.a',
-  command : ['make', '-j4', 'build', 'liboorb']
+  command : ['make', '-j4', 'liboorb']
 )
 
 # liboorb_dep = declare_dependency(
