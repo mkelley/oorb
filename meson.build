@@ -29,10 +29,6 @@ run_command(
   check: true
 )
 
-run_command(['ls'])
-
-run_command(['pwd'])
-
 liboorb = custom_target(
   'liboorb',
   output: 'liboorb.a',
@@ -48,5 +44,6 @@ liboorb = custom_target(
 py.extension_module(
   'pyoorb',
   ['python/pyoorb.f90', liboorb],
+  include_directories: include_directories('build'),
   install: true,
 )
