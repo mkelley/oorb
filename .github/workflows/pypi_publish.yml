@@ -41,6 +41,7 @@ jobs:
         env:
           CIBW_BUILD: "${{ matrix.pyversion }}-*"
           CIBW_ARCHS: "${{ matrix.architecture }}"
+          CIBW_SKIP: "*-musllinux*"
         with:
           output-dir: wheelhouse
 
