@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.15...3.30)
 project(${SKBUILD_PROJECT_NAME} LANGUAGES C Fortran)
 
+find_package(LAPACK)
 find_package(Python REQUIRED COMPONENTS Interpreter Development.Module NumPy)
 
 # Grab the variables from a local Python installation F2PY headers
@@ -12,7 +13,7 @@ execute_process(
 
 add_custom_command(
   OUTPUT prefix.h
-  COMMAND echo 'CHARACTER(len=0) :: PREFIX = ""' > ${CMAKE_CURRENT_SOURCE_DIR}/prefix.h)
+  COMMAND echo 'CHARACTER(len=0) :: PREFIX = \"\"' > ${CMAKE_CURRENT_SOURCE_DIR}/prefix.h)
 
 # Generate the wrapper files
 add_custom_command(
@@ -59,6 +60,11 @@ Python_add_library(
 )
 
 target_include_directories(pyoorb PUBLIC ${F2PY_INCLUDE_DIR})
-target_link_libraries(pyoorb PUBLIC Python::NumPy)
+target_link_libraries(
+  pyoorb
+  PUBLIC
+  Python::NumPy
+  LAPACK::LAPACK
+)
 
 install(TARGETS pyoorb DESTINATION .)

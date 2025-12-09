@@ -26,6 +26,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Astronomy",
     "Topic :: Scientific/Engineering :: Physics",
 ]
+dependencies = ["numpy>=2.0"]
 
 [project.urls]
 Repository = "https://github.com/oorb/oorb"
