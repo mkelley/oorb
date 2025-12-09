@@ -45,17 +45,6 @@ build-dir = "/tmp/pyoorb-build"
 [tool.setuptools_scm]
 version_file = "python/_version.py"
 
-[tool.setuptools]
-zip-safe = false
-
-[tool.setuptools.packages.find]
-where = ["python"]
-namespaces = false
-
-[tool.meson-python.args]
-compile = ['-j4', '-v']
-
-
 [tool.cibuildwheel]
 skip = "cp38*"
 # before-build = """
