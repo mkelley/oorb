@@ -10,22 +10,27 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+
       - name: Check for cached ephemeris data
         id: cache_ephemeris
         uses: actions/cache@v4
         with:
           path: data
           key: oorb_data
+          enableCrossOsArchive: true
+
       - name: Install dependencies
         if: steps.cache_ephemeris.outputs.cache-hit != 'true'
         run: |
           sudo apt-get update -y
           sudo apt-get install gfortran liblapack-dev meson ninja-build
+
       - name: Compile oorb
         if: steps.cache_ephemeris.outputs.cache-hit != 'true'
         run: |
           ./configure gfortran opt
           make -j2
+
       - name: Build ephemerides
         if: steps.cache_ephemeris.outputs.cache-hit != 'true'
         run: |
@@ -37,6 +42,7 @@ jobs:
           mv asteroid_indices.txt asteroid_indices.tmp
           head -n 3 asteroid_indices.tmp > asteroid_indices.txt
           tail -n 297 asteroid_indices.tmp | sed -e 's/^/#/' >> asteroid_indices.txt
+
       - name: Cache ephemeris data
         if: steps.cache_ephemeris.outputs.cache-hit != 'true'
         uses: actions/cache@v4
@@ -45,3 +51,4 @@ jobs:
           path: |
             data/
             !data/JPL_ephemeris
+          enableCrossOsArchive: true

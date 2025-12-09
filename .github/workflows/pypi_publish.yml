@@ -86,10 +86,11 @@ jobs:
           path: /tmp/artifacts/wheels
 
       - name: Restore cached ephemeris data
-        uses: actions/cache/restore@v4
+        uses: actions/cache@v4
         with:
           key: oorb_data
           path: /tmp/artifacts/oorb_data/
+          enableCrossOsArchive: true
 
       - name: Setup QEMU for aarch64
         if: matrix.architecture == 'aarch64'
