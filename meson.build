@@ -36,10 +36,9 @@ run_command(['pwd'])
 liboorb = custom_target(
   'liboorb',
   output: 'liboorb.a',
-  command : ['make', '-C' , '..', '-j4', 'build', 'liboorb']
+  command : ['make', '-C' , '..', '-j4', 'liboorb']
 #   command : ['ls']
 )
-message('@0@'.format(liboorb))
 
 # liboorb_dep = declare_dependency(
 #     link_with: liboorb,
