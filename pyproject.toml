@@ -33,10 +33,10 @@ Issues = "https://github.com/oorb/oorb/issues"
 
 [build-system]
 build-backend = "mesonpy"
-requires = ["meson-python", "setuptools_scm"]
+requires = ["meson-python", "setuptools_scm[simple]"]
 
 [tool.setuptools_scm]
-write_to = "python/_version.py"
+version_file = "python/_version.py"
 
 [tool.setuptools]
 zip-safe = false
@@ -45,12 +45,16 @@ zip-safe = false
 where = ["python"]
 namespaces = false
 
+[tool.meson-python.args]
+compile = ['-j4', '-v']
+
+
 [tool.cibuildwheel]
 skip = "cp38*"
-before-build = """
-pip install numpy &&
-./configure gfortran opt --with-pyoorb --with-f2py=f2py --with-python=python
-"""
+# before-build = """
+# pip install numpy &&
+# ./configure gfortran opt --with-pyoorb --with-f2py=f2py --with-python=python
+# """
 
 [tool.cibuildwheel.linux]
 before-all = """
