@@ -10,4 +10,3 @@ include COPYING
 include configure
 include pyproject.toml
 include CMakeLists.txt
-include prefix.h

@@ -37,7 +37,7 @@ build-backend = "scikit_build_core.build"
 
 [tool.scikit-build]
 cmake.version = "CMakeLists.txt"
-# sdist.cmake = true
+sdist.cmake = true
 build.verbose = true
 build-dir = "/tmp/pyoorb-build"
 

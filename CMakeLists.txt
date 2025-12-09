@@ -10,6 +10,10 @@ execute_process(
   OUTPUT_VARIABLE F2PY_INCLUDE_DIR
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+add_custom_command(
+  OUTPUT prefix.h
+  COMMAND echo 'CHARACTER(len=0) :: PREFIX = ""' > ${CMAKE_CURRENT_SOURCE_DIR}/prefix.h)
+
 # Generate the wrapper files
 add_custom_command(
   OUTPUT pyoorbmodule.c pyoorb-f2pywrappers2.f90
@@ -47,6 +51,7 @@ Python_add_library(
   classes/Base_class.f90
   classes/Observatories_class.f90
   classes/StochasticOrbit_class.f90
+  prefix.h
   "${CMAKE_CURRENT_BINARY_DIR}/pyoorbmodule.c"
   "${CMAKE_CURRENT_BINARY_DIR}/pyoorb-f2pywrappers2.f90"
   "${F2PY_INCLUDE_DIR}/fortranobject.c"
