@@ -32,8 +32,14 @@ Repository = "https://github.com/oorb/oorb"
 Issues = "https://github.com/oorb/oorb/issues"
 
 [build-system]
-build-backend = "mesonpy"
-requires = ["meson-python", "setuptools_scm[simple]"]
+requires = ["scikit-build-core", "numpy"] # "setuptools_scm[simple]"]
+build-backend = "scikit_build_core.build"
+
+[tool.scikit-build]
+cmake.version = "CMakeLists.txt"
+# sdist.cmake = true
+build.verbose = true
+build-dir = "/tmp/pyoorb-build"
 
 [tool.setuptools_scm]
 version_file = "python/_version.py"

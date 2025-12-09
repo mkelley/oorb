@@ -9,4 +9,5 @@ include VERSION
 include COPYING
 include configure
 include pyproject.toml
-include meson.build
+include CMakeLists.txt
+include prefix.h
