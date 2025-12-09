@@ -44,6 +44,6 @@ liboorb = custom_target(
 py.extension_module(
   'pyoorb',
   ['python/pyoorb.f90', liboorb],
-  include_directories: include_directories('build'),
+  include_directories: include_directories('../build'),
   install: true,
 )
