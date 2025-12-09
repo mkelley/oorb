@@ -32,6 +32,7 @@ jobs:
           cd data/JPL_ephemeris
           make -j2
           make test
+          cd ..
           ./getBC430
           mv asteroid_indices.txt asteroid_indices.tmp
           head -n 3 asteroid_indices.tmp > asteroid_indices.txt
