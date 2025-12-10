@@ -19,7 +19,7 @@ add_custom_command(
 add_custom_command(
   OUTPUT pyoorbmodule.c pyoorb-f2pywrappers2.f90
   COMMAND Python::Interpreter -m numpy.f2py
-          "${CMAKE_CURRENT_SOURCE_DIR}/pyoorb/pyoorb.f90" -m pyoorb
+          "${CMAKE_CURRENT_SOURCE_DIR}/pyoorb/pyoorb.f90" -m pyoorb.pyoorb
   VERBATIM
   DEPENDS pyoorb/pyoorb.f90)
 
