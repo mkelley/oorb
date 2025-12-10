@@ -19,9 +19,9 @@ add_custom_command(
 add_custom_command(
   OUTPUT pyoorbmodule.c pyoorb-f2pywrappers2.f90
   COMMAND Python::Interpreter -m numpy.f2py
-          "${CMAKE_CURRENT_SOURCE_DIR}/python/pyoorb.f90" -m pyoorb
+          "${CMAKE_CURRENT_SOURCE_DIR}/python/pyoorb/pyoorb.f90" -m pyoorb
   VERBATIM
-  DEPENDS python/pyoorb.f90)
+  DEPENDS python/pyoorb/pyoorb.f90)
 
 Python_add_library(
   pyoorb
@@ -56,7 +56,7 @@ Python_add_library(
   "${CMAKE_CURRENT_BINARY_DIR}/pyoorbmodule.c"
   "${CMAKE_CURRENT_BINARY_DIR}/pyoorb-f2pywrappers2.f90"
   "${F2PY_INCLUDE_DIR}/fortranobject.c"
-  python/pyoorb.f90
+  python/pyoorb/pyoorb.f90
 )
 
 target_include_directories(pyoorb PUBLIC ${F2PY_INCLUDE_DIR})

@@ -27,12 +27,15 @@ __pycache__
 .pytest_cache
 bin/
 lib/
+dist/
+sdist/
 build/_pyoorb_build/
 build/*.pyf
 build/version.h
-python/pyoorb.name
-python/pyoorb.sp_dir
+python/pyoorb/pyoorb.name
+python/pyoorb/pyoorb.sp_dir
 *.gcov
 *.gcda
 *.gcno
 wheelhouse/
+*.egg-info/
