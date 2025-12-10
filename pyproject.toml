@@ -33,12 +33,11 @@ Repository = "https://github.com/oorb/oorb"
 Issues = "https://github.com/oorb/oorb/issues"
 
 [build-system]
-requires = ["scikit-build-core", "numpy>=2.0", "ninja>1.10"]
+requires = ["scikit-build-core", "numpy>=2.0"]
 build-backend = "scikit_build_core.build"
 
 [tool.scikit-build]
-cmake.version = "CMakeLists.txt"
-# sdist.cmake = true
+ninja.version = ">=1.10"
 
 [tool.setuptools_scm]
 version_file = "python/_version.py"
