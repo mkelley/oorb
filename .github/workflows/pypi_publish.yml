@@ -13,25 +13,68 @@ jobs:
     uses: ./.github/workflows/oorb_data.yml
 
   wheels:
-    name: Build and test ${{ matrix.pyversion }}/${{ matrix.os }}
+    name: "Build wheels: ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
         os: [ubuntu-latest, ubuntu-24.04-arm, macos-15-intel, macos-latest]
-        pyversion: ["3.14"]
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          path: oorb/
 
-      - name: Setup python
+      - name: Setup python for cibuildwheel
+        uses: actions/setup-python@v5
+
+      - name: Set environment
+        run: |
+          echo "MACOSX_DEPLOYMENT_TARGET=15.0" >> "$GITHUB_ENV"
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v3.3.0
+        env:
+          CIBW_BUILD: "${{ matrix.pyversion }}-*"
+          CIBW_ARCHS: "native"
+          CIBW_SKIP: "*-musllinux*"
+        with:
+          output-dir: wheelhouse
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}
+          path: wheelhouse/*.whl
+
+  test-wheels:
+    name: Test ${{ matrix.pyversion }}/${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    needs: [wheels, oorb_data]
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-15-intel, macos-latest]
+        pyversion: ["3.10", "3.14"] # setup-python version selector
+
+    steps:
+      - name: Setup Python
         uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.pyversion }}
+
+      # checkout code specifically for python/test.py
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          path: ./_oorb
+
+      - name: Get wheels
+        uses: actions/download-artifact@v5
+        with:
+          name: wheels-${{ matrix.os }}
+          path: /tmp/artifacts/wheels
 
       - name: Restore cached ephemeris data
         uses: actions/cache/restore@v4
@@ -44,20 +87,6 @@ jobs:
       - name: Set environment
         run: |
           echo "OORB_DATA=/tmp/cache/oorb_data" >> "$GITHUB_ENV"
-          echo "MACOSX_DEPLOYMENT_TARGET=15.0" >> "$GITHUB_ENV"
-
-      - name: Build wheels
-        run: |
-          ls
-          cd oorb
-          pip install -U build
-          python -m build
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: wheels-${{ matrix.os }}-${{ matrix.pyversion }}
-          path: dist/*.whl
 
       - name: Install pyoorb from wheel
         # First, install with --no-index to make sure we don't hit up PyPI and
@@ -66,13 +95,14 @@ jobs:
         # install dependencies by repeating the command, but this time allowing
         # the index and deps.
         run: |
-          pip install --no-index --no-deps --find-links dist/ pyoorb
-          pip install --find-links dist/ pyoorb
+          pip install --no-index --no-deps --find-links /tmp/artifacts/wheels pyoorb
+          pip install --find-links /tmp/artifacts/wheels pyoorb
+
+      - name: Try importing pyoorb
+        run: python -c "import pyoorb; print('success.')"
 
       - name: Execute tests
-        run: |
-          python -c "import pyoorb; print('Import pyoorb success.')"
-          python oorb/python/test.py
+        run: python ./_oorb/python/test.py
 
   # build_sdist:
   #   # Make a plain source distribution with nothing precompiled.
@@ -81,11 +111,6 @@ jobs:
   #     - uses: actions/checkout@v6
   #     - name: Build SDist
   #       run: pipx run build --sdist
-  # - name: Get wheels
-  #   uses: actions/download-artifact@v5
-  #   with:
-  #     name: wheels-${{ matrix.os }}-${{ matrix.pyversion }}
-  #     path: dist/*.whl
   #     - uses: actions/upload-artifact@v4
   #       with:
   #         name: sdist
