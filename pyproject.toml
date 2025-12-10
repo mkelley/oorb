@@ -38,6 +38,7 @@ build-backend = "scikit_build_core.build"
 
 [tool.scikit-build]
 ninja.version = ">=1.10"
+cmake.source-dir = "python"
 
 [tool.setuptools_scm]
 version_file = "python/_version.py"
