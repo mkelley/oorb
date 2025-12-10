@@ -111,12 +111,16 @@ jobs:
     # Make a plain source distribution with nothing precompiled.
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout code
+        uses: actions/checkout@v6
 
-      - name: Build SDist
-        run: python3 -m build --sdist
+      - name: Build source distribution
+        run: |
+          pip install -U build
+          python3 -m build --sdist
 
-      - uses: actions/upload-artifact@v4
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
           name: sdist
           path: dist/*.tar.gz
