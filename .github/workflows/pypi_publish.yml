@@ -51,7 +51,7 @@ jobs:
           path: wheelhouse/*.whl
 
   test-wheels:
-    name: Test ${{ matrix.pyversion }}/${{ matrix.os }}
+    name: "Test wheels: ${{ matrix.os }}/py${{ matrix.pyversion }}"
     runs-on: ${{ matrix.os }}
     needs: [wheels, oorb_data]
 
@@ -69,8 +69,6 @@ jobs:
       # checkout code specifically for python/test.py
       - name: Checkout code
         uses: actions/checkout@v6
-        with:
-          path: ./_oorb
 
       - name: Get wheels
         uses: actions/download-artifact@v5
@@ -100,11 +98,10 @@ jobs:
           pip install --no-index --no-deps --find-links /tmp/artifacts/wheels pyoorb
           pip install --find-links /tmp/artifacts/wheels pyoorb
 
-      - name: Try importing pyoorb
-        run: python -c "import pyoorb; print('success.')"
-
-      - name: Execute tests
-        run: python ./_oorb/python/pyoorb/test.py
+      - name: Run tests
+        run: |
+          python -c "import pyoorb; print('Import success.')"
+          python python/pyoorb/test.py
 
   build_sdist:
     name: Build source distribution
