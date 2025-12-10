@@ -13,7 +13,7 @@ jobs:
     uses: ./.github/workflows/oorb_data.yml
 
   wheels:
-    name: Build ${{ matrix.pyversion }}/${{ matrix.os }}
+    name: Build and test ${{ matrix.pyversion }}/${{ matrix.os }}
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -50,6 +50,7 @@ jobs:
         run: |
           ls
           cd oorb
+          pip install -U build
           python -m build
 
       - name: Upload artifact
