@@ -35,9 +35,6 @@ jobs:
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.3.0
-        env:
-          CIBW_ARCHS: "native"
-          CIBW_SKIP: "*-musllinux*"
         with:
           output-dir: wheelhouse
 
@@ -55,7 +52,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, ubuntu-24.04-arm, macos-15-intel, macos-latest]
-        pyversion: ["3.10", "3.14"] # setup-python version selector
+        pyversion: ["3.10", "3.11", "3.12", "3.13", "3.14"] # setup-python version selector
 
     steps:
       - name: Setup Python

@@ -43,11 +43,8 @@ ninja.version = ">=1.10"
 version_file = "python/_version.py"
 
 [tool.cibuildwheel]
-skip = "cp38*"
-# before-build = """
-# pip install numpy &&
-# ./configure gfortran opt --with-pyoorb --with-f2py=f2py --with-python=python
-# """
+skip = ["*-musllinux*", "cp3??t-*"]
+archs = "native"
 
 [tool.cibuildwheel.linux]
 before-all = """
@@ -61,10 +58,9 @@ before-all = "apk update && apk add gfortran lapack lapack-dev libgfortran meson
 
 [[tool.cibuildwheel.overrides]]
 select = "*-manylinux_2_24*"
-before-all = "apt update -y && apt install gfortran liblapack-dev  meson ninja-build -y"
+before-all = "apt update -y && apt install gfortran liblapack-dev meson ninja-build -y"
 
 [tool.cibuildwheel.macos]
 before-all = """
 brew install gfortran lapack meson ninja --force
-brew reinstall gcc
 """
