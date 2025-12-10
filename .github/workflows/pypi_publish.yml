@@ -13,20 +13,13 @@ jobs:
     uses: ./.github/workflows/oorb_data.yml
 
   wheels:
-    name: Build ${{ matrix.pyversion }}/${{ matrix.os }}/${{ matrix.architecture }}
+    name: Build ${{ matrix.pyversion }}/${{ matrix.os }}
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        os: [ubuntu-latest] #, macos-latest]
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-13, macos-latest]
         pyversion: [cp314] # cibuildwheels python version selector
-        architecture: [x86_64] #, aarch64, arm64]
-        exclude:
-          - os: ubuntu
-            architecture: arm64
-          - os: macos
-            architecture: aarch64
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -40,7 +33,7 @@ jobs:
         uses: pypa/cibuildwheel@v3.3.0
         env:
           CIBW_BUILD: "${{ matrix.pyversion }}-*"
-          CIBW_ARCHS: "${{ matrix.architecture }}"
+          CIBW_ARCHS: "native"
           CIBW_SKIP: "*-musllinux*"
         with:
           output-dir: wheelhouse
@@ -48,24 +41,18 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-${{ matrix.os }}-${{ matrix.architecture }}
+          name: wheels-${{ matrix.os }}
           path: wheelhouse/*.whl
 
   test-wheels:
-    name: Test ${{ matrix.pyversion }}/${{ matrix.os }}/${{ matrix.architecture }}
+    name: Test ${{ matrix.pyversion }}/${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     needs: [wheels, oorb_data]
 
     strategy:
       matrix:
-        os: [ubuntu-latest] #, macos-latest]
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-13, macos-latest]
         pyversion: ["3.14"] # setup-python version selector
-        architecture: [x86_64] #, aarch64, arm64]
-        exclude:
-          - os: ubuntu
-            architecture: arm64
-          - os: macos
-            architecture: aarch64
 
     steps:
       - name: Setup Python
@@ -82,61 +69,34 @@ jobs:
       - name: Get wheels
         uses: actions/download-artifact@v5
         with:
-          name: wheels-${{ matrix.os }}-${{ matrix.architecture }}
+          name: wheels-${{ matrix.os }}
           path: /tmp/artifacts/wheels
 
       - name: Restore cached ephemeris data
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           key: oorb_data
-          path: /tmp/cache/oorb_data/
+          path: /tmp/cache/oorb_data
           enableCrossOsArchive: true
           fail-on-cache-miss: true
 
-      - name: Setup QEMU for aarch64
-        if: matrix.architecture == 'aarch64'
-        uses: docker/setup-qemu-action@v3
-        with:
-          platforms: arm64
-
-      - name: Run aarch64 tests in container
-        if: matrix.architecture == 'aarch64'
-        # Runs in emulation, so this can be very slow!
-        run: |
-          export DOCKER_IMAGE="arm64v8/python:${{ matrix.pyversion }}"
-          docker pull --platform linux/arm64 $DOCKER_IMAGE
-          docker run \
-            --platform linux/arm64 \
-            --volume /tmp/artifacts:/tmp/artifacts \
-            --volume $PWD/_oorb:/tmp/oorb_latest \
-            --env OORB_DATA=/tmp/cache/oorb_data \
-            $DOCKER_IMAGE \
-            /bin/bash -c "
-            pip install --no-index --no-deps --find-links /tmp/artifacts/wheels pyoorb && \
-            pip install --find-links /tmp/artifacts/wheels pyoorb && \
-            python /tmp/oorb_latest/python/test.py"
-
       - name: Set environment
-        if: ${{ matrix.architecture != 'aarch64' }}
         run: echo "OORB_DATA=/tmp/cache/oorb_data" >> "$GITHUB_ENV"
 
       - name: Install pyoorb from wheel
-        if: ${{ matrix.architecture != 'aarch64' }}
+        # First, install with --no-index to make sure we don't hit up PyPI and
+        # only use the local wheel. Use --no-deps, because we don't have a local
+        # copy of any dependencies. Once we are sure the local wheel works,
+        # install dependencies by repeating the command, but this time allowing
+        # the index and deps.
         run: |
-          # First, install with --no-index to make sure we don't hit up PyPI and only
-          # use the local wheel. Use --no-deps, because we don't have a local copy of
-          # any dependencies.
           pip install --no-index --no-deps --find-links /tmp/artifacts/wheels pyoorb
-          # Now that we are sure the local wheel works, install dependencies by repeating
-          # the command, but this time allowing the index and deps.
           pip install --find-links /tmp/artifacts/wheels pyoorb
 
       - name: Try importing pyoorb
-        if: ${{ matrix.architecture != 'aarch64' }}
         run: python -c "import pyoorb; print('success.')"
 
       - name: Execute tests
-        if: ${{ matrix.architecture != 'aarch64' }}
         run: python ./_oorb/python/test.py
 
   # # test all os, architecture, python combinations, the steps branch depending

@@ -51,6 +51,5 @@ jobs:
         uses: actions/cache/save@v4
         with:
           key: oorb_data
-          path: |
-            /tmp/cache/oorb_data
+          path: /tmp/cache/oorb_data
           enableCrossOsArchive: true
