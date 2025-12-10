@@ -36,7 +36,6 @@ jobs:
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.3.0
         env:
-          CIBW_BUILD: "${{ matrix.pyversion }}-*"
           CIBW_ARCHS: "native"
           CIBW_SKIP: "*-musllinux*"
         with:
