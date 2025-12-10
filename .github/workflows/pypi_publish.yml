@@ -89,8 +89,9 @@ jobs:
         uses: actions/cache@v4
         with:
           key: oorb_data
-          path: /tmp/artifacts/oorb_data/
+          path: /tmp/cache/oorb_data/
           enableCrossOsArchive: true
+          fail-on-cache-miss: true
 
       - name: Setup QEMU for aarch64
         if: matrix.architecture == 'aarch64'
@@ -108,12 +109,16 @@ jobs:
             --platform linux/arm64 \
             --volume /tmp/artifacts:/tmp/artifacts \
             --volume $PWD/_oorb:/tmp/oorb_latest \
-            --env OORB_DATA=/tmp/artifacts/oorb_data \
+            --env OORB_DATA=/tmp/cache/oorb_data \
             $DOCKER_IMAGE \
             /bin/bash -c "
             pip install --no-index --no-deps --find-links /tmp/artifacts/wheels pyoorb && \
             pip install --find-links /tmp/artifacts/wheels pyoorb && \
             python /tmp/oorb_latest/python/test.py"
+
+      - name: Set environment
+        if: ${{ matrix.architecture != 'aarch64' }}
+        run: echo "OORB_DATA=/tmp/cache/oorb_data" >> "$GITHUB_ENV"
 
       - name: Install pyoorb from wheel
         if: ${{ matrix.architecture != 'aarch64' }}
@@ -128,15 +133,11 @@ jobs:
 
       - name: Try importing pyoorb
         if: ${{ matrix.architecture != 'aarch64' }}
-        run: |
-          export OORB_DATA=/tmp/artifacts/oorb_data
-          python -c "import pyoorb; print('success.')"
+        run: python -c "import pyoorb; print('success.')"
 
       - name: Execute tests
         if: ${{ matrix.architecture != 'aarch64' }}
-        run: |
-          export OORB_DATA=/tmp/artifacts/oorb_data
-          python ./_oorb/python/test.py
+        run: python ./_oorb/python/test.py
 
   # # test all os, architecture, python combinations, the steps branch depending
   # # on if the architecture is (linux/)aarch64 or not
