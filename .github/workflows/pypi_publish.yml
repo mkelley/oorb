@@ -33,6 +33,12 @@ jobs:
         run: |
           echo "MACOSX_DEPLOYMENT_TARGET=15.0" >> "$GITHUB_ENV"
 
+      - uses: fortran-lang/setup-fortran@v1
+        id: setup-fortran
+        with:
+          compiler: gcc
+          version: latest
+
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.3.0
         with:
