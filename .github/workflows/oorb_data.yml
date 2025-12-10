@@ -44,7 +44,7 @@ jobs:
           head -n 3 asteroid_indices.tmp > asteroid_indices.txt
           tail -n 297 asteroid_indices.tmp | sed -e 's/^/#/' >> asteroid_indices.txt
           mkdir -p /tmp/cache/oorb_data
-          mv asteroid_*.txt de*.dat ET-UT.dat OBSCODE.dat TAI-UTC.dat /tmp/catch/oorb_data
+          mv asteroid_*.txt de*.dat ET-UT.dat OBSCODE.dat TAI-UTC.dat /tmp/cache/oorb_data
 
       - name: Cache ephemeris data
         if: steps.cache_ephemeris.outputs.cache-hit != 'true'
