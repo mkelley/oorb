@@ -104,19 +104,22 @@ jobs:
         run: python -c "import pyoorb; print('success.')"
 
       - name: Execute tests
-        run: python ./_oorb/python/test.py
+        run: python ./_oorb/python/pyoorb/test.py
 
-  # build_sdist:
-  #   # Make a plain source distribution with nothing precompiled.
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v6
-  #     - name: Build SDist
-  #       run: pipx run build --sdist
-  #     - uses: actions/upload-artifact@v4
-  #       with:
-  #         name: sdist
-  #         path: dist/*.tar.gz
+  build_sdist:
+    name: Build source distribution
+    # Make a plain source distribution with nothing precompiled.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Build SDist
+        run: python3 -m build --sdist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdist
+          path: dist/*.tar.gz
 
   # upload_all:
   #   name: Upload release to PyPI
