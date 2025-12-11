@@ -18,7 +18,7 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest] #, ubuntu-24.04-arm, macos-15-intel, macos-latest]
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-15-intel, macos-latest]
 
     steps:
       - name: Checkout code
@@ -57,8 +57,8 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest] #, ubuntu-24.04-arm, macos-15-intel, macos-latest]
-        pyversion: ["3.10"] #, "3.11", "3.12", "3.13", "3.14"] # setup-python version selector
+        os: [ubuntu-latest, ubuntu-24.04-arm, macos-15-intel, macos-latest]
+        pyversion: ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
       - name: Setup Python
