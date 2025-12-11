@@ -1,3 +1,4 @@
+# Build the pyoorb library
 cmake_minimum_required(VERSION 3.15...3.30)
 project(${SKBUILD_PROJECT_NAME} LANGUAGES C Fortran)
 
