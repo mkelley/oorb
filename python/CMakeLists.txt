@@ -12,10 +12,9 @@ execute_process(
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 # In lieu of running ./configure, create an empty prefix.
-# The [=[\"\"]=] echos a pair of double quotes.
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/../prefix.h
-  COMMAND echo -n 'CHARACTER(len=FNAME_LEN) :: PREFIX =' [=[\"\"]=] > "${CMAKE_CURRENT_SOURCE_DIR}/../prefix.h")
+  COMMAND echo CHARACTER\\\(len=FNAME_LEN\\\) :: PREFIX = \\\"\\\" > "${CMAKE_CURRENT_SOURCE_DIR}/../prefix.h")
 
 # Generate the wrapper files
 add_custom_command(
