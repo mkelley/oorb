@@ -66,7 +66,7 @@ jobs:
         with:
           python-version: ${{ matrix.pyversion }}
 
-      # checkout code specifically for python/test.py
+      # checkout code specifically for python/pyoorb/test.py
       - name: Checkout code
         uses: actions/checkout@v6
         with:
