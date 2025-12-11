@@ -25,6 +25,8 @@ jobs:
 
       - name: Setup python for cibuildwheel
         uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
 
       - name: Set environment
         run: |
@@ -36,6 +38,7 @@ jobs:
           compiler: gcc
           version: latest
 
+      # see pyproject.toml for cibuildwheel configuration
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.3.0
         with:
@@ -99,8 +102,6 @@ jobs:
 
       - name: Run tests
         run: |
-          pwd
-          ls
           python -c "import pyoorb; print('Import success.')"
           python python/pyoorb/test.py
 
@@ -144,9 +145,12 @@ jobs:
           merge-multiple: true
           path: dist/
 
-      - name: Publish package distributions to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        # delete after testing:
-        with:
-          verbose: true
-          repository-url: https://test.pypi.org/legacy/
+      - name: check dist
+        run: ls dist/
+
+      # - name: Publish package distributions to PyPI
+      #   uses: pypa/gh-action-pypi-publish@release/v1
+      #   # delete after testing:
+      #   with:
+      #     verbose: true
+      #     repository-url: https://test.pypi.org/legacy/
