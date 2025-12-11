@@ -1,5 +1,5 @@
 [project]
-name = "pyoorb"
+name = "test-pyoorb"
 description = "An open-source orbit-computation package for Solar System objects."
 readme = "README.md"
 authors = [
