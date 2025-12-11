@@ -4,7 +4,7 @@ on:
   release:
     types:
       - published
-  # delete after testing
+  # delete after testing:
   pull_request:
     branches: [master]
 
@@ -50,7 +50,7 @@ jobs:
           name: wheels-${{ matrix.os }}
           path: wheelhouse/*.whl
 
-  test-wheels:
+  test_wheels:
     name: "Test wheels: ${{ matrix.os }}/py${{ matrix.pyversion }}"
     runs-on: ${{ matrix.os }}
     needs: [wheels, oorb_data]
@@ -69,6 +69,8 @@ jobs:
       # checkout code specifically for python/test.py
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
 
       - name: Get wheels
         uses: actions/download-artifact@v5
@@ -124,32 +126,33 @@ jobs:
           name: sdist
           path: dist/*.tar.gz
 
-  # upload_all:
-  #   name: Upload release to PyPI
-  #   needs:
-  #     - build_sdist
-  #     - test_wheels
-  #   runs-on: ubuntu-latest
+  upload_all:
+    name: Upload release to PyPI
+    runs-on: ubuntu-latest
 
-  #   environment:
-  #     name: testpypi
-  #     url: https://test.pypi.org/legacy/
+    needs:
+      - build_sdist
+      - test_wheels
 
-  #   if: github.event_name == 'release' && github.event.action == 'published'
+    permissions:
+      id-token: write
 
-  #   permissions:
-  #     id-token: write
+    steps:
+      - name: Get wheel artifacts
+        uses: actions/download-artifact@v5
+        with:
+          merge-multiple: true
+          pattern: wheels-*
+          path: ./sdist/
 
-  #   steps:
-  #     - uses: actions/download-artifact@v5
-  #       with:
-  #         merge-multiple: true
-  #         pattern: wheels-*
-  #         path: ./sdist/
+      - name: Get source distribution artifact
+        uses: actions/download-artifact@v5
+        with:
+          name: sdist
+          path: ./sdist/
 
-  #     - uses: actions/download-artifact@v5
-  #       with:
-  #         name: sdist
-  #         path: ./sdist/
-
-  #     - uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        # delete after testing:
+        with:
+          repository-url: https://test.pypi.org/legacy/
