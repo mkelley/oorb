@@ -46,7 +46,6 @@ sdist.include = ["python/pyoorb/_version.py"]
 version_file = "python/pyoorb/_version.py"
 
 [tool.cibuildwheel]
-build = ["cp310-*"]
 skip = ["*-musllinux*", "cp3??t-*"]
 archs = "native"
 
