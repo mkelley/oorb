@@ -11,9 +11,11 @@ execute_process(
   OUTPUT_VARIABLE F2PY_INCLUDE_DIR
   OUTPUT_STRIP_TRAILING_WHITESPACE)
 
+# In lieu of running ./configure, create an empty prefix.
+# The [=[\"\"]=] echos a pair of double quotes.
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/../prefix.h
-  COMMAND echo 'CHARACTER(len=0) :: PREFIX = \"\"' > "${CMAKE_CURRENT_SOURCE_DIR}/../prefix.h")
+  COMMAND echo -n 'CHARACTER(len=FNAME_LEN) :: PREFIX =' [=[\"\"]=] > "${CMAKE_CURRENT_SOURCE_DIR}/../prefix.h")
 
 # Generate the wrapper files
 add_custom_command(
@@ -23,40 +25,41 @@ add_custom_command(
   VERBATIM
   DEPENDS pyoorb/pyoorb.f90)
 
+# Build pyoorb object will all of liboorb
 Python_add_library(
   pyoorb
   MODULE
   WITH_SOABI
-  "../modules/linal.f90"
-  "../modules/cl_options.f90"
-  "../modules/data_structures.f90"
-  "../modules/integrators.f90"
-  "../modules/estimators.f90"
-  "../modules/random.f90"
-  "../modules/functions.f90"
-  "../modules/sort.f90"
-  "../modules/planetary_data.f90"
-  "../modules/utilities.f90"
-  "../modules/parameters.f90"
-  "../modules/statistics.f90"
-  "../classes/Orbit_class.f90"
-  "../classes/Observation_class.f90"
-  "../classes/Time_class.f90"
-  "../classes/CartesianCoordinates_class.f90"
-  "../classes/File_class.f90"
-  "../classes/SphericalCoordinates_class.f90"
-  "../classes/Observatory_class.f90"
-  "../classes/Unit_class.f90"
-  "../classes/Observations_class.f90"
-  "../classes/PhysicalParameters_class.f90"
-  "../classes/Base_class.f90"
-  "../classes/Observatories_class.f90"
-  "../classes/StochasticOrbit_class.f90"
-  "../prefix.h"
+  ../modules/linal.f90
+  ../modules/cl_options.f90
+  ../modules/data_structures.f90
+  ../modules/integrators.f90
+  ../modules/estimators.f90
+  ../modules/random.f90
+  ../modules/functions.f90
+  ../modules/sort.f90
+  ../modules/planetary_data.f90
+  ../modules/utilities.f90
+  ../modules/parameters.f90
+  ../modules/statistics.f90
+  ../classes/Orbit_class.f90
+  ../classes/Observation_class.f90
+  ../classes/Time_class.f90
+  ../classes/CartesianCoordinates_class.f90
+  ../classes/File_class.f90
+  ../classes/SphericalCoordinates_class.f90
+  ../classes/Observatory_class.f90
+  ../classes/Unit_class.f90
+  ../classes/Observations_class.f90
+  ../classes/PhysicalParameters_class.f90
+  ../classes/Base_class.f90
+  ../classes/Observatories_class.f90
+  ../classes/StochasticOrbit_class.f90
+  ../prefix.h
   "${CMAKE_CURRENT_BINARY_DIR}/pyoorbmodule.c"
   "${CMAKE_CURRENT_BINARY_DIR}/pyoorb-f2pywrappers2.f90"
   "${F2PY_INCLUDE_DIR}/fortranobject.c"
-  "pyoorb/pyoorb.f90"
+  pyoorb/pyoorb.f90
 )
 
 target_include_directories(pyoorb PUBLIC ${F2PY_INCLUDE_DIR})
