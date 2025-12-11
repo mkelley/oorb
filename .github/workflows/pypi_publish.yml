@@ -123,7 +123,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: sdist
+          name: source-distribution
           path: dist/*.tar.gz
 
   # restore wheels and source distribution to dist/ and publish
@@ -151,11 +151,12 @@ jobs:
       - name: Get source distribution artifact
         uses: actions/download-artifact@v5
         with:
-          name: sdist
+          name: source-distribution
           path: dist/
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         # delete after testing:
         with:
+          verbose: true
           repository-url: https://test.pypi.org/legacy/
